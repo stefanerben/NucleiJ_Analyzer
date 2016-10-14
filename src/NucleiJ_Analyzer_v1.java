@@ -130,28 +130,28 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		}	
 		startExporter.summary(summaryStack.getString(), path.getValue(), today.getCurrentTimeStamp());
 		
-		System.out.println("\nAnzahl der gefundenen Elemente: " + gefundeneneElemente );	
-		
+		System.out.println("\nAnzahl der gefundenen Elemente: " + gefundeneneElemente );
+
 		System.out.println(resultStack.getValue());
-		
+
 		System.exit(0);
-  	}	
+  	}
 
 
 	//Particle Analyzer mit geaenderten Parametern starten, weitere Werte berechnen und Ausgabe starten
-	public void startParticleAnalyzer(ImagePlus markiert, String radiobox) 
+	public void startParticleAnalyzer(ImagePlus markiert, String radiobox)
 	{
 		//Particle Analyzer parametrisieren und ausfuehren:
 		IJ.run("Set Measurements...", "area standard centroid perimeter bounding shape redirect=None decimal=3");
 		String befehl = "size=$-Infinity pixel circularity=0.00-1.00 show=% ";	//display
-		
+
 		String endbefehl = befehl.replace("$", PIXEL_SIZE);
-		IJ.run("Analyze Particles...", endbefehl.replace("%", radiobox));	    
-	    
+		IJ.run("Analyze Particles...", endbefehl.replace("%", radiobox));
+
 	    System.out.print("Particle Analyzer wurde ausgefuehrt...");
-	    
+
 	    //Resultate auslesen:
-	  	ResultsTable alt = Analyzer.getResultsTable();	
+	  	ResultsTable alt = Analyzer.getResultsTable();
 	  	ResultsTable rt = (ResultsTable)alt.clone();
 	  	
 	  	int counter = 0;
@@ -164,7 +164,8 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	  	double[] yCoordinate = new double[counter];
 	  	double[] perim = new double[counter];
 	  	double[] bx = new double[counter];
-	  	double[] width = new double[counter];
+		double[] by = new double[counter];
+		double[] width = new double[counter];
 	  	double[] height = new double[counter];
 	  	double[] circ = new double[counter];
 	  	double[] ar = new double[counter];
@@ -178,17 +179,20 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	  	double area_arith = 0;
 		int found_particles = 0;
 	  	
-		DecimalFormat df = new DecimalFormat("#.###");
-		df.setRoundingMode(RoundingMode.HALF_UP);
+		DecimalFormat d3 = new DecimalFormat("#.###");
+
+		d3.setRoundingMode(RoundingMode.HALF_UP);
+		DecimalFormat d1 = new DecimalFormat("#.##");
+		d1.setRoundingMode(RoundingMode.HALF_UP);
 		
 		//funktioniert noch nicht
-		DecimalFormat nr = new DecimalFormat("######.#");
-		nr.setRoundingMode(RoundingMode.HALF_UP);
-		
-		
+		DecimalFormat nr = new DecimalFormat( "00000" );
+		DecimalFormat n13 = new DecimalFormat( "0.000" );
+		DecimalFormat n32 = new DecimalFormat( "000.00" );
+
 		//STringBuffer erstellen, in diesen werden nun alle Results gespeichert
 		StringBuffer resultzeile = new StringBuffer();
-		resultzeile.append("Nummer \t\tX \tY \tPerim.\t BX\t BY\t Width\t Height\t Circ.\t AR\t Round\t Solidity\n");
+		resultzeile.append("Nummer\tArea\tX\t\tY\t\tPerim.\tBX\t\tBY\t\tWidth\tHeight\tCirc.\tAR\t\tRound\tSolidity\n");
 		
 		if (EXPORT_RESULTS_CHECKBOX == true)
 		{
@@ -202,6 +206,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 				yCoordinate[x] = rt.getValue("Y", x);
 				perim[x] = rt.getValue("Perim.", x);
 				bx[x] = rt.getValue("BX", x);
+				by[x] = rt.getValue("BY", x);
 				width[x] = rt.getValue("Width", x);
 				height[x] = rt.getValue("Height", x);
 				circ[x] = rt.getValue("Circ.", x);
@@ -209,15 +214,24 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 				solidity[x] = rt.getValue("Solidity", x);
 				
 				//Diese Variablen in String speichern
-				
-				
+
+
 				resultzeile.append(nr.format(x+1) + "\t");
-				resultzeile.append(df.format(area[x]) + "\t");
-				resultzeile.append(df.format(xCoordinate[x]) +"\t\t");
-				resultzeile.append(df.format(yCoordinate[x]) + "\n");
-				
-			
-				
+				resultzeile.append(d3.format(area[x]) + "\t");
+				resultzeile.append(n32.format(xCoordinate[x]) +"\t");
+				resultzeile.append(n32.format(yCoordinate[x]) + "\t");
+				resultzeile.append(d3.format(perim[x]) + "\t");
+				resultzeile.append(n32.format(bx[x]) + "\t");
+				resultzeile.append(n32.format(by[x]) + "\t");
+				resultzeile.append(d3.format(width[x]) + "\t");
+				resultzeile.append(d3.format(height[x]) + "\t");
+				resultzeile.append(n13.format(circ[x]) + "\t");
+				resultzeile.append(n13.format(ar[x]) + "\t");
+				resultzeile.append(n13.format(roundness[x]) + "\t");
+				resultzeile.append(n13.format(solidity[x]) + "\n");
+
+
+
 				//resultStack.setString(rt.toString() + "\n" );
 				
 				/*
@@ -359,19 +373,19 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
     		{
     			//Bild oeffnen, var setzen dass bild bereits offen ist
         		imp.updateAndRepaintWindow();
-        		
+
         		new WaitForUserDialog("Information", "Please set a rectangular\nROI and press OK").show();
-        		
+
         		Roi roi = imp.getRoi();
         		if (roi instanceof Roi)
-        		{ 
+        		{
         		    IJ.run(imp, "Crop", "");
       		        imp.updateAndDraw();
-      		        
+
       		        CROP_CHECKBOX = true;
        			}
     		}while (CROP_CHECKBOX==false);
-    		
+
     		System.out.print("\n\nROI set:");
     	}
 	}
@@ -380,26 +394,26 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	{
 		GenericDialog gd = new GenericDialog("User Interface");
 		gd.addMessage("Cell Counting Program (Stefan Erben v35):\n***********************************************");
-		
+
 		gd.addNumericField("min. particle size [px]:", 4, 1);
 		String[] items = {"Nothing", "Outlines", "Masks"};
-		gd.addRadioButtonGroup("Which result should be displayed?", items, 2, 1, "Nothing");	
-		
+		gd.addRadioButtonGroup("Which result should be displayed?", items, 2, 1, "Nothing");
+
 		gd.addCheckbox("set ROI?", false);
 		gd.addCheckbox("Export marked Scan", false);
 		gd.addCheckbox("Export Results", false);
-		gd.addCheckbox("create Heatmap?", false);	
+		gd.addCheckbox("create Heatmap?", false);
 
 		gd.addSlider("Quality", 1, 100, 60);
 		gd.addHelp("http://imagej.nih.gov/ij");
-		
+
 		gd.showDialog();
 		if (gd.wasCanceled())
             return null;
-		
-		double pixeldouble = gd.getNextNumber();		
+
+		double pixeldouble = gd.getNextNumber();
 		PIXEL_SIZE = String.valueOf(pixeldouble);
-		
+
 		CROP_CHECKBOX = gd.getNextBoolean();
 		EXPORT_PIC_CHECKBOX  = gd.getNextBoolean();
 		EXPORT_RESULTS_CHECKBOX = gd.getNextBoolean();
@@ -407,88 +421,88 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 
 		double aufloesungdouble = (double)gd.getNextNumber();
 		AUFLOESUNG_SLIDER = (int) aufloesungdouble;
-		
+
 		String radio = gd.getNextRadioButton();
-		
-		return radio;	
+
+		return radio;
 	}
 
 	//Maske erstellen
 	public void createMask(ImagePlus markiert, boolean x10, String radiobox, int w, int h)
 	{
 		IJ.run(markiert, "Multiply...", "value=5");
-	    
-		Prefs.blackBackground = false;    
-		IJ.run(markiert, "Make Binary", "");	    
+
+		Prefs.blackBackground = false;
+		IJ.run(markiert, "Make Binary", "");
 	    IJ.run(markiert, "Fill Holes", "");
 
 	    //Erben Analyzer starten
-	    startParticleAnalyzer(markiert, radiobox);  
-	        
+	    startParticleAnalyzer(markiert, radiobox);
+
 	    //Results exportieren
 	    if (EXPORT_RESULTS_CHECKBOX == true)
 	    {
 	    	startExporter.Results(resultStack.getValue(), file.getValue(), path.getValue() );
-	    	
+
 	    	String resultsFilename = file.getValue() + "_Results.txt";		//Neuen Filenamen festlegen
-	    	
+
 	    	String exportResulttable = path.getValue() + "\\" + resultsFilename;
-		    
+
 	    	IJ.saveAs("Results", exportResulttable);
 		    System.out.print("\n\nMesswerte als File (.txt) exportieren...\n");
 		    System.out.print(exportResulttable);
 	    }
-	    
+
 	    //Bild wieder entsperren und zurueck invertieren
 	    markiert.unlock();
-	    
+
 	    //Invertieren oder nicht?
 		ImageProcessor invertieren = markiert.getProcessor();
 		int bwZaehler = 0;
-		for (int x = 0; x <= w; x++) 
+		for (int x = 0; x <= w; x++)
 		{
-			for (int y = 0; y <= h; y++) 
+			for (int y = 0; y <= h; y++)
 			{
 				int p = invertieren.getPixel(x, y);
 				if (p == 0)
 				{
 					//Zellkerne zaehlen
-					bwZaehler++;					
-				}								
+					bwZaehler++;
+				}
 			}
 		}
 		//Fehler verhindern, da Bild vom externen Plugin invertiert werden kann
 		int gesamtzaehler = w*h;
 		if (bwZaehler < (gesamtzaehler/2))
 		{
-			IJ.run(markiert, "Invert", ""); 
+			IJ.run(markiert, "Invert", "");
 		}
-	  
+
 	    //Filter anwenden und wieder zu RGB Bild zurueckwandeln
 		if (x10 == true)
 		{
-			IJ.run(markiert, "Median...", "radius=1");	
+			IJ.run(markiert, "Median...", "radius=1");
 		}
 		else
 		{
 			IJ.run(markiert, "Median...", "radius=3");
 		}
-		
+
 	    IJ.run(markiert, "RGB Color", "");
-	    
+
 	    System.out.print("\n\nMaske wurde erstellt...");
-	    
+
 	    return;
 	}
 
-	
+
 	//Ausgabe der Zellkern Informationen
 	public void outputCellnucleiInfo(double counter, double area_all, double area_min, double area_max, double area_arith, double median, double found_particles)
 	{
 		//Titel des Scans: originalFilename
 		// anzahl der _ (30 - lenght) / 2)
 		// for 1 bis anzahl der _, ausgeben *
-		
+
 		String ueberschrift = "";
 		int lenghtFilename = file.getValue().length();
 		if ((50 -lenghtFilename) % 2 == 0)
@@ -505,7 +519,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		}
 		else
 		{
-			for (int k = 0; k < (((50 - lenghtFilename - 1) / 2)+1); k++)		
+			for (int k = 0; k < (((50 - lenghtFilename - 1) / 2)+1); k++)
 			{
 				ueberschrift = ueberschrift + "_";
 			}
@@ -517,59 +531,59 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		}
 		int intcounter = (int) counter;
 		counter = 0;
-		
+
 		//Ausgabe ImageJ-LOG
 		IJ.log("\n\n" + ueberschrift);
 		IJ.log("Founded nuclei:\t\t\t\t" + intcounter);
 		IJ.log("Additional measured values:");
-		  	
+
 		if (IJ.getLog() != null)
 		{
-			System.out.println(IJ.getLog()); 
+			System.out.println(IJ.getLog());
 		}else
 		{
-			System.out.println("ERROR no Log founded"); 
+			System.out.println("ERROR no Log founded");
 		}
-		  	
-			  	
+
+
 		//Ausgabe in String -> Summary-File
 		String summaryString = "";
 		summaryString = summaryString + "\n\n" + ueberschrift + "\nFounded nuclei:\t\t\t\t" + intcounter + "\nAdditional measured values:\n" ;
-		intcounter = 0;	  	
-			  	
+		intcounter = 0;
+
 		//Werte auf 3 Kommastellen runden und anzeigen
 		DecimalFormat df = new DecimalFormat("#.###");
 		df.setRoundingMode(RoundingMode.HALF_UP);
-		 	
+
 		//Ausgaben in einem ImageJ Log Fenster / speichern in String:
 		IJ.log("Total area of all nuclei:\t" + df.format(area_all) + " um2");		//Ausgabe der Gesamtflaeche aller Zellkerne (auf 3 Kommastellen genau)
 		summaryString = summaryString + "Total area of all nuclei:\t" + df.format(area_all) + " um2\n";
-			  	
+
 		IJ.log("Smallest cell nucleus:\t\t" + df.format(area_min) + " um2");	//Ausgabe der Flaeche des kleinsten gefunden Zellkerns (auf 3 Kommastellen genau)
 		summaryString = summaryString + "Smallest cell nucleus:\t\t" + df.format(area_min) + " um2\n";	//Ausgabe der Flaeche des kleinsten gefunden Zellkerns (auf 3 Kommastellen genau)
-			  	
+
 		IJ.log("largest cell nucleus:\t\t" + df.format(area_max) + " um2");		//Ausgabe der Flaeche des groessten gefunden Zellkerns (auf 3 Kommastellen genau)
 		summaryString = summaryString + "largest cell nucleus:\t\t" + df.format(area_max) + " um2\n";		//Ausgabe der Flaeche des groessten gefunden Zellkerns (auf 3 Kommastellen genau)
-				
+
 		IJ.log("Arithmetic mean area:\t\t" + df.format(area_arith) + " um2");	//Ausgabe des arithmetishen Mittels aller Zellkernflaechen (auf 3 Kommastellen genau)
 		summaryString = summaryString + "Arithmetic mean area:\t\t" + df.format(area_arith) + " um2\n";	//Ausgabe des arithmetishen Mittels aller Zellkernflaechen (auf 3 Kommastellen genau)
-			  	
+
 		IJ.log("Median area:\t\t\t\t" + df.format(median) + " um2");				//Ausgabe des Medianwerts aller Zellkernfleachen (auf 3 Kommastellen genau)
 		summaryString = summaryString + "Median area:\t\t\t\t" + df.format(median) + " um2\n";				//Ausgabe des Medianwerts aller Zellkernfleachen (auf 3 Kommastellen genau)
-			  	
+
 		IJ.log("oval cell nucleus:\t\t\t" + found_particles);		//Ausgabe der gefundenen ovalen Zellkernen
 		summaryString = summaryString + "oval cell nucleus:\t\t\t" + found_particles +"\n";		//Ausgabe der gefundenen ovalen Zellkernen
-		
+
 		//An StringStack uebergeben
 		summaryStack.appendString(summaryString);
-		
+
 		return;
 	}
-	
+
 	//UP zum exportieren des rot markierten Scans
-	
-	
-	
-	
+
+
+
+
 }
 

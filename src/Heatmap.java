@@ -124,8 +124,13 @@ public class Heatmap
   		
   		IJ.run(heatmapTmp, "Multiply...", befehl.replace("%", value));
   		IJ.run(heatmapTmp, "Fire", "");
-  		
-  		//Speichern der Heatmap
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		//Speichern der Heatmap
   		String resultsFilename = filename.replaceFirst("[.][^.]+$", "") + "_Heatmap.jpg";		//Neuen Filenamen festlegen
   		String exportHeatmap = path + "\\" + resultsFilename;
 		

@@ -16,24 +16,23 @@ public class Exporter
     	
     	String exportReport = path + "\\" + ReportFilename;
      	
-     	File file = new File(exportReport);
+     	File reportfile = new File(exportReport);
         try {
-			file.createNewFile();
+			reportfile.createNewFile();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         FileWriter fw = null;
 		try {
-			fw = new FileWriter(file);
+			fw = new FileWriter(reportfile);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         BufferedWriter writeSummary = new BufferedWriter(fw);
         try {
-			
-        	writeSummary.write("Result fuer den Scan: " + "\n");
+        	writeSummary.write("Results fuer den Scan: " + filename.replaceFirst("[.][^.]+$", "") + "\n\n");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -135,12 +134,12 @@ public class Exporter
 		if (EXPORT_PIC_CHECKBOX == true)
 		{
 			
-			filename = filename.replaceFirst("[.][^.]+$", "") + "_Marked";		//Neuen Filenamen festlegen
+			filename = filename.replaceFirst("[.][^.]+$", "") + "_Marked.jpg";		//Neuen Filenamen festlegen
 	    	
 	    	String exportEndpic = path + "\\" + filename;
-			
+
 		    IJ.saveAs(imp, "Jpeg", exportEndpic);
-		    System.out.print("\n\nMarkierter Schnitt exportiert...\n");
+		    System.out.print("\n\nMarkierter Schnitt exportiert: " + exportEndpic + "\n");
 		    System.out.print(filename);
 		}
 		
