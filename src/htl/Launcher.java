@@ -2,10 +2,19 @@ package htl;
 
 import ij.IJ;
 
-//Launcher v1, startet automatisch das Plugin
+/**
+ * Launcher Class, starts NucleiJ Analyzer Programm
+ * @author Stefan Erben
+ * @version 1.0
+ *
+ */
 
 public class Launcher 
 {
+	/**
+	 * starts the plugin without the typical ImageJ User Interface
+	 * @param args Command Line Parameters
+	 */
 	public static void main(String...args)
 	{
 		/*
@@ -19,7 +28,7 @@ public class Launcher
 		rt.show("Results");
 		 */
 		
-		IJ.run("NucleiJ Analyzer v1","");
+		IJ.run("NucleiJ Analyzer v1","");		//Starten des Plugins
 		
 	}
 }

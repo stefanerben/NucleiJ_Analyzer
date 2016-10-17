@@ -346,7 +346,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	    
 	    //Ergebnis anzeigen & als neue Datei speichern,
 	    imp.updateAndRepaintWindow();
-	    startExporter.heatmap(imp, file.getValue(), path.getValue(), EXPORT_PIC_CHECKBOX);
+	    startExporter.marked(imp, file.getValue(), path.getValue(), EXPORT_PIC_CHECKBOX);
 	    
 	    //Heatmap erstellen
 	    if (HEATMAP_CHECKBOX == true) {   heatmap.create(file.getValue(), path.getValue(), AUFLOESUNG_SLIDER, heatmapTmp, heatmapMaske, heatmap_ip, w, h);   }   
@@ -442,7 +442,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	    //Results exportieren
 	    if (EXPORT_RESULTS_CHECKBOX == true)
 	    {
-	    	startExporter.Results(resultStack.getValue(), file.getValue(), path.getValue() );
+	    	startExporter.results(resultStack.getValue(), file.getValue(), path.getValue() );
 
 	    	String resultsFilename = file.getValue() + "_Results.txt";		//Neuen Filenamen festlegen
 

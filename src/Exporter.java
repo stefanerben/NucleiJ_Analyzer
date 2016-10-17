@@ -6,9 +6,29 @@ import java.io.IOException;
 import ij.IJ;
 import ij.ImagePlus;
 
-public class Exporter 
+/**
+ * Exporter class for the NucleiJ Analyzer
+ * @author Stefan Erben
+ * @version 1.0
+ *
+ */
+
+public class Exporter
 {
-	public void Results(String resultzeile, String filename, String path)
+	/**
+	 * The results method creates and exports a textfile (.txt), which contains the analyzed results for the
+	 * current Scan.
+	 *
+	 * @param resultzeile	String, which contains the return value of the method getValue() from the object
+	 *                         resultStack. The String represents the hole Results of the analyzed Scan.
+	 * @see StringAdder
+	 *
+	 * @param filename		String, which contains the return value of the getValue Method from the Object file
+	 * @param path 			String, which String, which contains the return value of the getValue Method from
+	 *                         the Object path
+	 * @see StringTransfer
+	 */
+	public void results(String resultzeile, String filename, String path)
 	{
 
 		// In Textdatei exportieren
@@ -58,9 +78,22 @@ public class Exporter
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
+
+	/**
+	 * The summary method creates and exports a textfile (.txt), which contains and exports the summary of the
+	 * analyzed results for the current Scan.
+	 *
+	 * @param summaryStack	String, which contains the return value of the method getString() from the object
+	 *                         summaryStack.
+	 * @see StringAdder
+	 *
+	 * @param path			String, which contains the return value of the method getValue() from the object path
+	 * @see StringTransfer
+	 *
+	 * @param todayTimeStamp String, which contains the return value of the method getCurrentTimeStamp() from the
+	 *                       object today.
+	 * @see Timestamp
+	 */
 	public void summary(String summaryStack, String path, String todayTimeStamp)
 	{
 		System.out.println();
@@ -127,13 +160,29 @@ public class Exporter
 		
 		
 	}
-	
-	
-	public void heatmap(ImagePlus imp, String filename, String path, boolean EXPORT_PIC_CHECKBOX)
+
+	/**
+	 * The heatmap method creates and exports a textfile (.txt), which exports the heatmap
+	 * for the current Scan.
+	 *
+	 * @param imp					Object from the ImagePlus class, which contains the created 8bit Heatmap for the
+	 *                              	currently analyzed Scan.
+	 * @see ImagePlus
+	 *
+	 * @param filename 				String, which contains the return value of the method getValue() from the object
+	 *                         			file.
+	 * @see StringTransfer
+	 *
+	 * @param path 					String, which contains the return value of the method getValue() from the object
+	 *                         			path.
+	 * @see StringTransfer
+	 *
+	 * @param EXPORT_PIC_CHECKBOX	boolean value, if true, the marked Scan will be exported, otherwise not
+	 */
+	public void marked(ImagePlus imp, String filename, String path, boolean EXPORT_PIC_CHECKBOX)
 	{
 		if (EXPORT_PIC_CHECKBOX == true)
 		{
-			
 			filename = filename.replaceFirst("[.][^.]+$", "") + "_Marked.jpg";		//Neuen Filenamen festlegen
 	    	
 	    	String exportEndpic = path + "\\" + filename;
@@ -142,7 +191,6 @@ public class Exporter
 		    System.out.print("\n\nMarkierter Schnitt exportiert: " + exportEndpic + "\n");
 		    System.out.print(filename);
 		}
-		
 	    return;
 	}
 	

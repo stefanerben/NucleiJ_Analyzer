@@ -2,14 +2,19 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 
-//MeasureSettings Class v1
+/**
+ * MeasureSettings Klasse fuer NucleiJ
+ * @author Stefan Erben
+ * @version 1.0
+ *
+ */
 
 public class MeasureSettings 
 {
 	public void setMeasurementProporties(ImagePlus imp, double distance) 
 	{
 		String distanceString = String.valueOf(distance);
-    	String befehlMeassurement = "distance=% known=1 pixel=1 unit=µm";
+    	String befehlMeassurement = "distance=% known=1 pixel=1 unit=ï¿½m";
     	IJ.run(imp, "Set Scale...", befehlMeassurement.replace("%", distanceString));
 		
     	return;	
@@ -32,7 +37,7 @@ public class MeasureSettings
     	}
     	else
     	{
-    		//Generic Dialog zum selber Auswählen
+    		//Generic Dialog zum selber Auswï¿½hlen
     		distanceTmp = selectMagnificationManually();
     	}
 		return distanceTmp;

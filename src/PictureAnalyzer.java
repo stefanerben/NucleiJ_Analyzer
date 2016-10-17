@@ -1,6 +1,11 @@
 import ij.process.ImageProcessor;
 
-//PictureAnalyzer Class v1
+/**
+ * PictureAnalyzer class for the NucleiJ Analyzer
+ * @author Stefan Erben
+ * @version 1.0
+ *
+ */
 
 public class PictureAnalyzer 
 {
