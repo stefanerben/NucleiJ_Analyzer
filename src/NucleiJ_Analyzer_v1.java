@@ -19,7 +19,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	// Constants **************************************************************	
 	public static String PIXEL_SIZE;		//fuer min Partikelgroesse
 	public static int AUFLOESUNG_SLIDER; 	//fuer die aufloesung der heatmap
-	public static boolean CROP_CHECKBOX;		//var ob bild zugeschnitten werden soll
+	public static boolean CROP_CHECKBOX;		//var ob das bild zugeschnitten werden soll
 	public static boolean HEATMAP_CHECKBOX;	//var ob heatmap erstellt werden soll
 	public static boolean EXPORT_PIC_CHECKBOX;	//var ob markierter schnitt exportiert werden soll
 	public static boolean EXPORT_RESULTS_CHECKBOX;	 //var ob Results exportiert werden sollen
@@ -79,7 +79,6 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 				double distance = settings.selectMagnificationAutomatically(pfad, x10);
 		    			
 				//gewaehltes Bild automatisch laden
-				System.out.println("Diese Bild wird geoffnet:\n" + pfad);
 				ImagePlus imp = IJ.openImage(pfad);
 				imp.unlock();
 				imp.show();
@@ -107,17 +106,13 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 				
 				//Ausgabe und Ende des Programms 
 			    //IJ.showMessage("Es wurden" ,pixelanzahl+ " Pixel gefunden!");
-			    System.out.print("\n\nScan verarbeitet\n");
+			    System.out.print("\n\n############################################################\n");
 		    
 			   //Ende des HP
 		    }
 		    
 		  }
-		  else 
-		  {
-		    //System.out.println("Error");
-			  
-		  }
+
 		   
 		}
 		
@@ -132,8 +127,6 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		
 		System.out.println("\nAnzahl der gefundenen Elemente: " + gefundeneneElemente );
 
-		System.out.println(resultStack.getValue());
-
 		System.exit(0);
   	}
 
@@ -142,13 +135,13 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	public void startParticleAnalyzer(ImagePlus markiert, String radiobox)
 	{
 		//Particle Analyzer parametrisieren und ausfuehren:
+		System.out.print("Particle Analyzer wurde ausgefuehrt...");
+
 		IJ.run("Set Measurements...", "area standard centroid perimeter bounding shape redirect=None decimal=3");
 		String befehl = "size=$-Infinity pixel circularity=0.00-1.00 show=% ";	//display
 
 		String endbefehl = befehl.replace("$", PIXEL_SIZE);
 		IJ.run("Analyze Particles...", endbefehl.replace("%", radiobox));
-
-	    System.out.print("Particle Analyzer wurde ausgefuehrt...");
 
 	    //Resultate auslesen:
 	  	ResultsTable alt = Analyzer.getResultsTable();
@@ -185,12 +178,12 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		DecimalFormat d1 = new DecimalFormat("#.##");
 		d1.setRoundingMode(RoundingMode.HALF_UP);
 		
-		//funktioniert noch nicht
+		//Zahlenformate und Kommastellendefiniton
 		DecimalFormat nr = new DecimalFormat( "00000" );
 		DecimalFormat n13 = new DecimalFormat( "0.000" );
 		DecimalFormat n32 = new DecimalFormat( "000.00" );
 
-		//STringBuffer erstellen, in diesen werden nun alle Results gespeichert
+		//StringBuffer erstellen, in diesen werden nun alle Results gespeichert
 		StringBuffer resultzeile = new StringBuffer();
 		resultzeile.append("Nummer\tArea\tX\t\tY\t\tPerim.\tBX\t\tBY\t\tWidth\tHeight\tCirc.\tAR\t\tRound\tSolidity\n");
 		
@@ -198,8 +191,6 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		{
 			for (int x = 0; x <= counter-1; x++)
 		  	{
-		  		//System.out.println(x + "\n");
-		  		//Werte in Variablen laden
 		  		area[x] = rt.getValue("Area", x);
 				roundness[x] = rt.getValue("Round", x);
 				xCoordinate[x] = rt.getValue("X", x);
@@ -214,8 +205,6 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 				solidity[x] = rt.getValue("Solidity", x);
 				
 				//Diese Variablen in String speichern
-
-
 				resultzeile.append(nr.format(x+1) + "\t");
 				resultzeile.append(d3.format(area[x]) + "\t");
 				resultzeile.append(n32.format(xCoordinate[x]) +"\t");
@@ -230,18 +219,6 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 				resultzeile.append(n13.format(roundness[x]) + "\t");
 				resultzeile.append(n13.format(solidity[x]) + "\n");
 
-
-
-				//resultStack.setString(rt.toString() + "\n" );
-				
-				/*
-				//Diesen in File schreiben
-				if (x % 1000 == 0)
-				{
-					writeResults2File();
-					resultStack.setString("reset");
-				}
-				*/
 		  	}
 			resultStack.setValue(resultzeile.toString());
 		  	
@@ -261,21 +238,6 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	  	
 	  	for (int x = 0; x <= counter-1; x++)
 	  	{
-	  		/*
-	  		//Null setzen
-	  		area[x] = 0;
-			roundness[x] = 0;
-			xCoordinate[x] = 0;
-			yCoordinate[x] = 0;
-			perim[x] = 0;
-			bx[x] = 0;
-			width[x] = 0;
-			height[x] = 0;
-			circ[x] = 0;
-			ar[x] = 0;
-			solidity[x] = 0;
-			*/
-			
 	  		//Berechnungen fuer Area:
 	  	   	if (area[x] < area_min)
 	  	   	{
@@ -312,18 +274,9 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		}
 		
 	  	outputCellnucleiInfo(counter, area_all, area_min, area_max, area_arith, median, found_particles);
-		
-	  	//resultStack.setString("reset");
-	  	//resultStack.setString(rt.toString() );
-	  	
-		rt.show("Results");
-		IJ.run("Clear Results", "");
-	}
-	
-	
-	
 
-	
+	}
+
 
 	public void startImageProcessingActivity(ImageProcessor original, ImageProcessor copy, ImageProcessor sicherung, ImagePlus heatmapTmp, 
 			ImagePlus imp, ImageProcessor heatmap_ip, boolean x10, String radiobox, int w, int h)
@@ -386,7 +339,6 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
        			}
     		}while (CROP_CHECKBOX==false);
 
-    		System.out.print("\n\nROI set:");
     	}
 	}
 
@@ -405,7 +357,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		gd.addCheckbox("create Heatmap?", false);
 
 		gd.addSlider("Quality", 1, 100, 60);
-		gd.addHelp("http://imagej.nih.gov/ij");
+		gd.addHelp("http://htl-hl.ac.at");
 
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -439,18 +391,18 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	    //Erben Analyzer starten
 	    startParticleAnalyzer(markiert, radiobox);
 
-	    //Results exportieren
+		//Results exportieren
 	    if (EXPORT_RESULTS_CHECKBOX == true)
 	    {
 	    	startExporter.results(resultStack.getValue(), file.getValue(), path.getValue() );
 
-	    	String resultsFilename = file.getValue() + "_Results.txt";		//Neuen Filenamen festlegen
-
+			/*
+			String resultsFilename = file.getValue() + "_Results.txt";		//Neuen Filenamen festlegen
 	    	String exportResulttable = path.getValue() + "\\" + resultsFilename;
 
 	    	IJ.saveAs("Results", exportResulttable);
-		    System.out.print("\n\nMesswerte als File (.txt) exportieren...\n");
-		    System.out.print(exportResulttable);
+	    	*/
+		    System.out.print("\n\nMesswerte als File (.txt) exportiert...\n");
 	    }
 
 	    //Bild wieder entsperren und zurueck invertieren
@@ -489,8 +441,6 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		}
 
 	    IJ.run(markiert, "RGB Color", "");
-
-	    System.out.print("\n\nMaske wurde erstellt...");
 
 	    return;
 	}
@@ -540,11 +490,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		if (IJ.getLog() != null)
 		{
 			System.out.println(IJ.getLog());
-		}else
-		{
-			System.out.println("ERROR no Log founded");
 		}
-
 
 		//Ausgabe in String -> Summary-File
 		String summaryString = "";

@@ -14,7 +14,7 @@ public class MeasureSettings
 	public void setMeasurementProporties(ImagePlus imp, double distance) 
 	{
 		String distanceString = String.valueOf(distance);
-    	String befehlMeassurement = "distance=% known=1 pixel=1 unit=�m";
+    	String befehlMeassurement = "distance=% known=1 pixel=1 unit=um";
     	IJ.run(imp, "Set Scale...", befehlMeassurement.replace("%", distanceString));
 		
     	return;	
@@ -37,7 +37,7 @@ public class MeasureSettings
     	}
     	else
     	{
-    		//Generic Dialog zum selber Ausw�hlen
+    		//Generic Dialog zum selber Auswaehlen
     		distanceTmp = selectMagnificationManually();
     	}
 		return distanceTmp;

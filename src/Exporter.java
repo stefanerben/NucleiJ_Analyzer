@@ -101,7 +101,7 @@ public class Exporter
 		if (summaryStack != null)			//Error Handling
 		{
 			String logInhalt = summaryStack;
-			System.out.println("\nInhalt des Logfensters:\n" +logInhalt +"\n");
+			System.out.println("\n" +logInhalt +"\n");
 			
 			// In Textdatei exportieren
 			String ReportFilename = "Summary-Report.txt";		//Neuen Filenamen festlegen
@@ -183,7 +183,7 @@ public class Exporter
 	{
 		if (EXPORT_PIC_CHECKBOX == true)
 		{
-			filename = filename.replaceFirst("[.][^.]+$", "") + "_Marked.jpg";		//Neuen Filenamen festlegen
+			filename = filename.replaceFirst("[.][^.]+$", "") + "_Marked.jpg";	//Neuen Filenamen festlegen
 	    	
 	    	String exportEndpic = path + "\\" + filename;
 
