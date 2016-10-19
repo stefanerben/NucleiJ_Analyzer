@@ -1,10 +1,12 @@
+package classes;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
 public class Heatmap 
 {
-	public void create(String filename, String path, int AUFLOESUNG_SLIDER, ImagePlus heatmapTmp, ImageProcessor heatmapMaske, ImageProcessor heatmap_ip, int w, int h)
+	public void create(String filename, String path, String newDirectoryname, int AUFLOESUNG_SLIDER, ImagePlus heatmapTmp, ImageProcessor heatmapMaske, ImageProcessor heatmap_ip, int w, int h)
 	{
 		//Dichte berechnen:		
   		float radiusFloat = (float) (w * 0.0002 * AUFLOESUNG_SLIDER);		//w/(w/aufloesung);
@@ -132,7 +134,7 @@ public class Heatmap
 
 		//Speichern der Heatmap
   		String resultsFilename = filename.replaceFirst("[.][^.]+$", "") + "_Heatmap.jpg";		//Neuen Filenamen festlegen
-  		String exportHeatmap = path + "\\" + resultsFilename;
+  		String exportHeatmap = path + newDirectoryname + "\\" + resultsFilename;
 		
 	    IJ.saveAs(heatmapTmp, "Jpeg", exportHeatmap);
 	    System.out.print("\n\nHeatmap exportiert...\n");

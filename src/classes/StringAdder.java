@@ -1,4 +1,4 @@
-//SummaryCreator Class v1, Stringspeicher fuer SummaryReport
+package classes;//SummaryCreator Class v1, Stringspeicher fuer SummaryReport
 
 public class StringAdder 
 {

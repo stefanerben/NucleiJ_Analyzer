@@ -1,7 +1,10 @@
+package classes;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -15,6 +18,24 @@ import ij.ImagePlus;
 
 public class Exporter
 {
+	public String newDirectoryname = null;
+
+	//setValue
+	public void setnewDirectoryname(String uebergebenerString)
+	{
+		newDirectoryname = uebergebenerString;
+
+	}
+
+	//getValue
+	public String getnewDirectoryname()
+	{
+		return newDirectoryname;
+
+	}
+
+
+
 	/**
 	 * The results method creates and exports a textfile (.txt), which contains the analyzed results for the
 	 * current Scan.
@@ -34,7 +55,7 @@ public class Exporter
 		// In Textdatei exportieren
 		String ReportFilename = filename.replaceFirst("[.][^.]+$", "") + "_Results.txt";		//Neuen Filenamen festlegen
     	
-    	String exportReport = path + "\\" + ReportFilename;
+    	String exportReport = path + newDirectoryname + "\\" + ReportFilename;
      	
      	File reportfile = new File(exportReport);
         try {
@@ -106,7 +127,7 @@ public class Exporter
 			// In Textdatei exportieren
 			String ReportFilename = "Summary-Report.txt";		//Neuen Filenamen festlegen
 	    	
-	    	String exportReport = path + "\\" + ReportFilename;
+	    	String exportReport = path + newDirectoryname + "\\" + ReportFilename;
 	     	
 	     	File file = new File(exportReport);
 	        try {
@@ -179,15 +200,15 @@ public class Exporter
 	 *
 	 * @param EXPORT_PIC_CHECKBOX	boolean value, if true, the marked Scan will be exported, otherwise not
 	 */
-	public void marked(ImagePlus imp, String filename, String path, boolean EXPORT_PIC_CHECKBOX)
+	public void marked(ImagePlus imp, String filename, String path, String getnewDirectoryname, boolean EXPORT_PIC_CHECKBOX)
 	{
 		if (EXPORT_PIC_CHECKBOX == true)
 		{
-			filename = filename.replaceFirst("[.][^.]+$", "") + "_Marked.jpg";	//Neuen Filenamen festlegen
+			filename = filename.replaceFirst("[.][^.]+$", "") + "_Marked.tif";	//Neuen Filenamen festlegen
 	    	
-	    	String exportEndpic = path + "\\" + filename;
+	    	String exportEndpic = path + newDirectoryname + "\\" + filename;
 
-		    IJ.saveAs(imp, "Jpeg", exportEndpic);
+		    IJ.saveAs(imp, "Tif", exportEndpic);
 		    System.out.print("\n\nMarkierter Schnitt exportiert: " + exportEndpic + "\n");
 		    System.out.print(filename);
 		}

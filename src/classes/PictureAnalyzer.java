@@ -1,3 +1,5 @@
+package classes;
+
 import ij.process.ImageProcessor;
 
 /**
@@ -56,9 +58,11 @@ public class PictureAnalyzer
 	
 	
 	//UP zum Detektieren von bestimmten blauen Pixeln
-	public void detectCellPixels(ImageProcessor original, int w, int h)
+	public int detectCellPixels(ImageProcessor original, int w, int h)
 	{
-	   	//Zellkerne erkennen
+		//Zellkerne erkennen
+
+		int k=0; 			//Countervar
 	    for (int x = 0; x <= w; x++) 
 		{
 			for (int y = 0; y <= h; y++) 
@@ -67,7 +71,7 @@ public class PictureAnalyzer
 				
 				//Blauwert aus RGB herausfiltern
 				int r = (c & 0xff0000) >> 16;
-				//int g = (c & 0x00ff00) >> 8;
+				int g = (c & 0x00ff00) >> 8;
 				int b = (c & 0x0000ff);
 				
 				//moegliche Zellkerne markieren
@@ -75,9 +79,19 @@ public class PictureAnalyzer
 			    {
 			    	original.putPixel(x, y, 0);
 			    }
+
+
+			    if (b > 225 && g > 225 && r > 225 )
+				{
+					k++;
+					//original.putPixel(x, y, 0);
+				}
 	    	 }
 	   	}
-	return;
+		//Berechnen der Anzahl der Gewebepixel:
+	   	//System.out.println(k +"\nw: " + w +"\nh: " + h +"\n");
+		int gewebepixel = (w * h) - k;
+	   	return gewebepixel;
 	}
 		
 	

@@ -14,6 +14,8 @@ import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
+import classes.*;
+
 public class NucleiJ_Analyzer_v1 implements PlugInFilter 
 {
 	// Constants **************************************************************	
@@ -34,6 +36,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	StringTransfer file = new StringTransfer();
 	Heatmap heatmap = new Heatmap();
 	Exporter startExporter = new Exporter();
+	PictureCharacteristics properties = new PictureCharacteristics();
 	
     public int setup(String arg, ImagePlus imp) 
     {
@@ -49,7 +52,19 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		String choosenDirectory = "C:\\Users\\Stefan\\Desktop\\Medizin Projekt\\Bilder\\stapel\\";
 		choosenDirectory = IJ.getString("Enter the path of the scan:", choosenDirectory);
 		path.setValue(choosenDirectory);
-		
+
+		//einen Ordner erstellen:
+		startExporter.setnewDirectoryname("Output");
+		boolean success = new File(path.getValue() + startExporter.getnewDirectoryname() ).mkdirs();
+		if (!success)
+		{
+			// Directory creation failed
+			System.out.println("Error beim Verzeichnis erstellen!");
+		}
+
+		//File verzeichnis = new File(path.getValue() + "\\Testname");
+		//verzeichnis.mkdir();
+
 		//Benutzeroberflaeche und Radioboxen
 		String radiobox = initGraphics();
 		if (radiobox == null) { return; }		//Error Checker
@@ -77,6 +92,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		    	//ist Scan in x10 oder x40 Aufloesung? -> Umrechnungsfaktor px=um
 				boolean x10 = file.getValue().toLowerCase().contains("x10");
 				double distance = settings.selectMagnificationAutomatically(pfad, x10);
+				properties.setMagnification(distance);
 		    			
 				//gewaehltes Bild automatisch laden
 				ImagePlus imp = IJ.openImage(pfad);
@@ -169,7 +185,9 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	  	double area_max = 0;
 	  	double area_min = 999999999;
 	  	double area_all = 0;
+		double perim_all = 0;
 	  	double area_arith = 0;
+		double perim_arith = 0;
 		int found_particles = 0;
 	  	
 		DecimalFormat d3 = new DecimalFormat("#.###");
@@ -219,6 +237,10 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 				resultzeile.append(n13.format(roundness[x]) + "\t");
 				resultzeile.append(n13.format(solidity[x]) + "\n");
 
+				//arithmetischen Umfang berechnen
+				perim_all += perim[x];
+
+
 		  	}
 			resultStack.setValue(resultzeile.toString());
 		  	
@@ -230,13 +252,16 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		  		//Werte in Variablen laden
 		  		area[x] = rt.getValue("Area", x);
 				roundness[x] = rt.getValue("Round", x);
-				
+				perim[x] = rt.getValue("Perim.", x);
+
+				//arithmetischen Umfang berechnen
+				perim_all += perim[x];
+
 		  	}
 		  	
 		}
-		
-	  	
-	  	for (int x = 0; x <= counter-1; x++)
+
+		for (int x = 0; x <= counter-1; x++)
 	  	{
 	  		//Berechnungen fuer Area:
 	  	   	if (area[x] < area_min)
@@ -248,7 +273,8 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	  	   		area_max = area[x];
 	  	   	}
 	  	   	area_all += area[x];
-	  	   	
+
+
 	  	   	//ovale Partikel zaehlen
 	  	   	if (roundness[x] > 0.05 && roundness[x] < 0.4)
 		   	{
@@ -259,7 +285,8 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	  	}
 	  	
 	  	//Arithmetisches Mittel berechnen
-	  	area_arith = area_all / counter;	
+	  	area_arith = area_all / counter;
+		perim_arith = perim_all / counter;
 		
 		//Median berechnen:
 		Arrays.sort(area);
@@ -273,7 +300,9 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		    median = (double) area[area.length/2];
 		}
 		
-	  	outputCellnucleiInfo(counter, area_all, area_min, area_max, area_arith, median, found_particles);
+	  	outputCellnucleiInfo(counter, perim_arith, area_all, area_min, area_max, area_arith, median, found_particles);
+
+		IJ.run("Clear Results", "");
 
 	}
 
@@ -281,8 +310,9 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	public void startImageProcessingActivity(ImageProcessor original, ImageProcessor copy, ImageProcessor sicherung, ImagePlus heatmapTmp, 
 			ImagePlus imp, ImageProcessor heatmap_ip, boolean x10, String radiobox, int w, int h)
 	{
-		//Zellkerne erkennen und Fehlerpixel ignorieren
-		simplePixelAnalysis.detectCellPixels(original, w, h);
+		//Zellkerne erkennen und Fehlerpixel ignorieren sowie Tumarflaeche berechnen
+		int gewebepixel = simplePixelAnalysis.detectCellPixels(original, w, h);
+		properties.setGewebepixel(gewebepixel);
 	    simplePixelAnalysis.ignoreSinglePixels(original, copy, x10, w, h);
 	        
 	    //Image fuer Kommandos vorbereiten
@@ -299,10 +329,10 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 	    
 	    //Ergebnis anzeigen & als neue Datei speichern,
 	    imp.updateAndRepaintWindow();
-	    startExporter.marked(imp, file.getValue(), path.getValue(), EXPORT_PIC_CHECKBOX);
+	    startExporter.marked(imp, file.getValue(), path.getValue(), startExporter.getnewDirectoryname(), EXPORT_PIC_CHECKBOX);
 	    
 	    //Heatmap erstellen
-	    if (HEATMAP_CHECKBOX == true) {   heatmap.create(file.getValue(), path.getValue(), AUFLOESUNG_SLIDER, heatmapTmp, heatmapMaske, heatmap_ip, w, h);   }   
+	    if (HEATMAP_CHECKBOX == true) {   heatmap.create(file.getValue(), path.getValue(), startExporter.getnewDirectoryname(), AUFLOESUNG_SLIDER, heatmapTmp, heatmapMaske, heatmap_ip, w, h);   }
 	    
 	    //es wurden keine Aenderungen vorgenommen, -> "wollen Sie speichern" umgehen
 	    imp.changes = false;
@@ -447,7 +477,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 
 
 	//Ausgabe der Zellkern Informationen
-	public void outputCellnucleiInfo(double counter, double area_all, double area_min, double area_max, double area_arith, double median, double found_particles)
+	public void outputCellnucleiInfo(double counter, double perim_arith, double area_all, double area_min, double area_max, double area_arith, double median, double found_particles)
 	{
 		//Titel des Scans: originalFilename
 		// anzahl der _ (30 - lenght) / 2)
@@ -494,7 +524,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 
 		//Ausgabe in String -> Summary-File
 		String summaryString = "";
-		summaryString = summaryString + "\n\n" + ueberschrift + "\nFounded nuclei:\t\t\t\t" + intcounter + "\nAdditional measured values:\n" ;
+		summaryString = summaryString + "\n\n" + ueberschrift + "\nFound nuclei:\t\t\t\t" + intcounter + "\nAdditional measured values:\n" ;
 		intcounter = 0;
 
 		//Werte auf 3 Kommastellen runden und anzeigen
@@ -503,10 +533,17 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 
 		//Ausgaben in einem ImageJ Log Fenster / speichern in String:
 		IJ.log("Total area of all nuclei:\t" + df.format(area_all) + " um2");		//Ausgabe der Gesamtflaeche aller Zellkerne (auf 3 Kommastellen genau)
+
+		summaryString = summaryString + "gesamte Gewebeflaeche:\t\t" + df.format(properties.getTumorArea()) + " um2\n";
+
 		summaryString = summaryString + "Total area of all nuclei:\t" + df.format(area_all) + " um2\n";
 
-		IJ.log("Smallest cell nucleus:\t\t" + df.format(area_min) + " um2");	//Ausgabe der Flaeche des kleinsten gefunden Zellkerns (auf 3 Kommastellen genau)
-		summaryString = summaryString + "Smallest cell nucleus:\t\t" + df.format(area_min) + " um2\n";	//Ausgabe der Flaeche des kleinsten gefunden Zellkerns (auf 3 Kommastellen genau)
+		summaryString = summaryString + "Zellkernflaeche in %:\t\t" + df.format(100 / (properties.getTumorArea() / area_all)) + "%\n";
+
+		summaryString = summaryString + "Arithmetic Perimeter:\t\t" + df.format(perim_arith) + " um\n";
+
+		IJ.log("\nSmallest cell nucleus:\t\t" + df.format(area_min) + " um2");	//Ausgabe der Flaeche des kleinsten gefunden Zellkerns (auf 3 Kommastellen genau)
+		summaryString = summaryString + "\nSmallest cell nucleus:\t\t" + df.format(area_min) + " um2\n";	//Ausgabe der Flaeche des kleinsten gefunden Zellkerns (auf 3 Kommastellen genau)
 
 		IJ.log("largest cell nucleus:\t\t" + df.format(area_max) + " um2");		//Ausgabe der Flaeche des groessten gefunden Zellkerns (auf 3 Kommastellen genau)
 		summaryString = summaryString + "largest cell nucleus:\t\t" + df.format(area_max) + " um2\n";		//Ausgabe der Flaeche des groessten gefunden Zellkerns (auf 3 Kommastellen genau)

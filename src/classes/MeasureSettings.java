@@ -1,3 +1,5 @@
+package classes;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
