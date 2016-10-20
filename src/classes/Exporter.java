@@ -35,6 +35,51 @@ public class Exporter
 	}
 
 
+	public void csvSummary (String resultzeile, String path)
+	{
+		String exportReport = path + newDirectoryname + "\\" + "Results.csv";
+
+		File reportfile = new File(exportReport);
+		try {
+			reportfile.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(reportfile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		BufferedWriter writeSummary = new BufferedWriter(fw);
+
+		try {
+			writeSummary.write(resultzeile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//writeSummary.flush();
+
+		try {
+			writeSummary.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			writeSummary.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+
+
 
 	/**
 	 * The results method creates and exports a textfile (.txt), which contains the analyzed results for the

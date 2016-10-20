@@ -28,6 +28,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 
 	//Create Objektes
 	StringAdder summaryStack = new StringAdder();
+	StringAdder csvSummaryStack = new StringAdder();
 	StringTransfer resultStack = new StringTransfer();
 	Timestamp today = new Timestamp();
 	MeasureSettings settings = new MeasureSettings();
@@ -62,8 +63,8 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 			System.out.println("Error beim Verzeichnis erstellen!");
 		}
 
-		//File verzeichnis = new File(path.getValue() + "\\Testname");
-		//verzeichnis.mkdir();
+		csvSummaryStack.appendString("csvHeader");
+		//csvSummaryStack.appendString("gesamte Gewebeflaeche [um2];Total area of all nuclei [um2];Zellkernflaeche in %;Zellkerne / mm2;Arithmetic Perimeter [um];Smallest cell nucleus [um2];largest cell nucleus [um2];Arithmetic mean area [um2];Median area [um2];oval cell nucleus;\n");
 
 		//Benutzeroberflaeche und Radioboxen
 		String radiobox = initGraphics();
@@ -81,7 +82,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		  {
 			
 			String dateiname = listOfFiles[i].getName();
-		    if (dateiname.endsWith("jpg") == true)
+		    if (dateiname.endsWith("tif") == true)
 		    {
 		    	gefundeneneElemente++;
 		    	
@@ -140,6 +141,8 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 			
 		}	
 		startExporter.summary(summaryStack.getString(), path.getValue(), today.getCurrentTimeStamp());
+
+		startExporter.csvSummary(csvSummaryStack.getString(), path.getValue());
 		
 		System.out.println("\nAnzahl der gefundenen Elemente: " + gefundeneneElemente );
 
@@ -203,7 +206,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 
 		//StringBuffer erstellen, in diesen werden nun alle Results gespeichert
 		StringBuffer resultzeile = new StringBuffer();
-		resultzeile.append("Nummer\tArea\tX\t\tY\t\tPerim.\tBX\t\tBY\t\tWidth\tHeight\tCirc.\tAR\t\tRound\tSolidity\n");
+		resultzeile.append("Nummer\tArea\tPerim.\tRound\tWidth\tHeight\tX\t\t\tY\t\tCirc.\tSolidity\n");
 		
 		if (EXPORT_RESULTS_CHECKBOX == true)
 		{
@@ -214,8 +217,6 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 				xCoordinate[x] = rt.getValue("X", x);
 				yCoordinate[x] = rt.getValue("Y", x);
 				perim[x] = rt.getValue("Perim.", x);
-				bx[x] = rt.getValue("BX", x);
-				by[x] = rt.getValue("BY", x);
 				width[x] = rt.getValue("Width", x);
 				height[x] = rt.getValue("Height", x);
 				circ[x] = rt.getValue("Circ.", x);
@@ -225,16 +226,17 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 				//Diese Variablen in String speichern
 				resultzeile.append(nr.format(x+1) + "\t");
 				resultzeile.append(d3.format(area[x]) + "\t");
-				resultzeile.append(n32.format(xCoordinate[x]) +"\t");
-				resultzeile.append(n32.format(yCoordinate[x]) + "\t");
+
 				resultzeile.append(d3.format(perim[x]) + "\t");
-				resultzeile.append(n32.format(bx[x]) + "\t");
-				resultzeile.append(n32.format(by[x]) + "\t");
+				resultzeile.append(n13.format(roundness[x]) + "\t");
+
 				resultzeile.append(d3.format(width[x]) + "\t");
 				resultzeile.append(d3.format(height[x]) + "\t");
+
+				resultzeile.append(n32.format(xCoordinate[x]) +"\t\t");
+				resultzeile.append(n32.format(yCoordinate[x]) + "\t");
+
 				resultzeile.append(n13.format(circ[x]) + "\t");
-				resultzeile.append(n13.format(ar[x]) + "\t");
-				resultzeile.append(n13.format(roundness[x]) + "\t");
 				resultzeile.append(n13.format(solidity[x]) + "\n");
 
 				//arithmetischen Umfang berechnen
@@ -524,41 +526,53 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 
 		//Ausgabe in String -> Summary-File
 		String summaryString = "";
+		String csvSummaryString = "";
 		summaryString = summaryString + "\n\n" + ueberschrift + "\nFound nuclei:\t\t\t\t" + intcounter + "\nAdditional measured values:\n" ;
-		intcounter = 0;
+
 
 		//Werte auf 3 Kommastellen runden und anzeigen
 		DecimalFormat df = new DecimalFormat("#.###");
 		df.setRoundingMode(RoundingMode.HALF_UP);
 
 		//Ausgaben in einem ImageJ Log Fenster / speichern in String:
-		IJ.log("Total area of all nuclei:\t" + df.format(area_all) + " um2");		//Ausgabe der Gesamtflaeche aller Zellkerne (auf 3 Kommastellen genau)
+		csvSummaryString = csvSummaryString + file.getValue().replaceFirst("[.][^.]+$", "") + ";";
 
 		summaryString = summaryString + "gesamte Gewebeflaeche:\t\t" + df.format(properties.getTumorArea()) + " um2\n";
+		csvSummaryString = csvSummaryString + df.format(properties.getTumorArea()) + ";";
 
 		summaryString = summaryString + "Total area of all nuclei:\t" + df.format(area_all) + " um2\n";
+		csvSummaryString = csvSummaryString + df.format(area_all) + ";";
 
 		summaryString = summaryString + "Zellkernflaeche in %:\t\t" + df.format(100 / (properties.getTumorArea() / area_all)) + "%\n";
+		csvSummaryString = csvSummaryString + df.format(100 / (properties.getTumorArea() / area_all)) + ";";
+
+		summaryString = summaryString + "Zellkerne pro mm2:\t\t\t" + df.format((intcounter / properties.getTumorArea() ) * 1000000 ) + "\n";		//Zellkerne 1 / Tumorfläche in um2 / 1000000
+		csvSummaryString = csvSummaryString + df.format((intcounter / properties.getTumorArea() ) * 1000000 ) + ";";		//Zellkerne 1 / Tumorfläche in um2 / 1000000
 
 		summaryString = summaryString + "Arithmetic Perimeter:\t\t" + df.format(perim_arith) + " um\n";
+		csvSummaryString = csvSummaryString + df.format(perim_arith) + ";";
 
-		IJ.log("\nSmallest cell nucleus:\t\t" + df.format(area_min) + " um2");	//Ausgabe der Flaeche des kleinsten gefunden Zellkerns (auf 3 Kommastellen genau)
 		summaryString = summaryString + "\nSmallest cell nucleus:\t\t" + df.format(area_min) + " um2\n";	//Ausgabe der Flaeche des kleinsten gefunden Zellkerns (auf 3 Kommastellen genau)
+		csvSummaryString = csvSummaryString + df.format(area_min) + ";";	//Ausgabe der Flaeche des kleinsten gefunden Zellkerns (auf 3 Kommastellen genau)
 
-		IJ.log("largest cell nucleus:\t\t" + df.format(area_max) + " um2");		//Ausgabe der Flaeche des groessten gefunden Zellkerns (auf 3 Kommastellen genau)
 		summaryString = summaryString + "largest cell nucleus:\t\t" + df.format(area_max) + " um2\n";		//Ausgabe der Flaeche des groessten gefunden Zellkerns (auf 3 Kommastellen genau)
+		csvSummaryString = csvSummaryString + df.format(area_max) + ";";		//Ausgabe der Flaeche des groessten gefunden Zellkerns (auf 3 Kommastellen genau)
 
-		IJ.log("Arithmetic mean area:\t\t" + df.format(area_arith) + " um2");	//Ausgabe des arithmetishen Mittels aller Zellkernflaechen (auf 3 Kommastellen genau)
 		summaryString = summaryString + "Arithmetic mean area:\t\t" + df.format(area_arith) + " um2\n";	//Ausgabe des arithmetishen Mittels aller Zellkernflaechen (auf 3 Kommastellen genau)
+		csvSummaryString = csvSummaryString + df.format(area_arith) + ";";	//Ausgabe des arithmetishen Mittels aller Zellkernflaechen (auf 3 Kommastellen genau)
 
-		IJ.log("Median area:\t\t\t\t" + df.format(median) + " um2");				//Ausgabe des Medianwerts aller Zellkernfleachen (auf 3 Kommastellen genau)
 		summaryString = summaryString + "Median area:\t\t\t\t" + df.format(median) + " um2\n";				//Ausgabe des Medianwerts aller Zellkernfleachen (auf 3 Kommastellen genau)
+		csvSummaryString = csvSummaryString + df.format(median) + ";";				//Ausgabe des Medianwerts aller Zellkernfleachen (auf 3 Kommastellen genau)
 
-		IJ.log("oval cell nucleus:\t\t\t" + found_particles);		//Ausgabe der gefundenen ovalen Zellkernen
 		summaryString = summaryString + "oval cell nucleus:\t\t\t" + found_particles +"\n";		//Ausgabe der gefundenen ovalen Zellkernen
+		csvSummaryString = csvSummaryString + found_particles +"\n";		//Ausgabe der gefundenen ovalen Zellkernen
 
 		//An StringStack uebergeben
 		summaryStack.appendString(summaryString);
+		csvSummaryStack.appendString(csvSummaryString);
+
+		//counter wieder null setzen
+		intcounter = 0;
 
 		return;
 	}

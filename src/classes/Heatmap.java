@@ -12,7 +12,7 @@ public class Heatmap
   		float radiusFloat = (float) (w * 0.0002 * AUFLOESUNG_SLIDER);		//w/(w/aufloesung);
   		int radius = Math.round(radiusFloat);
   		int max = 0;
-  		int suchsetzRadius = w / 400;
+  		int suchsetzRadius = w / 150;		//400
   		for (int x = 0; x <= w; x=x+suchsetzRadius) 
   		{
   			if (x == 0)
@@ -83,7 +83,10 @@ public class Heatmap
   				//alles abgesucht, sum ist gesetzt
   				if (sum == 0)
   				{
-  					dichte = 0;			    
+  					dichte = 0;
+
+					// TODO jeden Px setzten, da Heatmap eh schon kleiner ist
+
   				    for (j=-suchsetzRadius; j<=suchsetzRadius; j++)
     				{
     					for (i=-suchsetzRadius; i<=suchsetzRadius; i++)
@@ -97,7 +100,10 @@ public class Heatmap
   				}
   				else
   				{
-  					dichte = 255 / (abgesuchtepixel / sum); 					
+
+					// TODO jeden Px setzten, da Heatmap eh schon kleiner ist
+
+					dichte = 255 / (abgesuchtepixel / sum);
   					if (dichte > max)
   					{
   						max = (int) dichte;
@@ -126,6 +132,7 @@ public class Heatmap
   		
   		IJ.run(heatmapTmp, "Multiply...", befehl.replace("%", value));
   		IJ.run(heatmapTmp, "Fire", "");
+
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
