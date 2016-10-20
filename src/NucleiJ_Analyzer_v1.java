@@ -114,7 +114,7 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 			    ImageProcessor sicherung = original.duplicate();
 			    
 			    //Neues 8-Bit Bild erstellen fuer Heatmap
-			    ImagePlus heatmapTmp = IJ.createImage("Heatmap", "8-bit", w, h, 1);
+			    ImagePlus heatmapTmp = IJ.createImage("Heatmap", "8-bit", w/10, h/10, 1);
 				ImageProcessor heatmap_ip = heatmapTmp.getProcessor();
 			    
 				
