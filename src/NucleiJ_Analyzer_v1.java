@@ -194,8 +194,8 @@ public class NucleiJ_Analyzer_v1 implements PlugInFilter
 		int found_particles = 0;
 	  	
 		DecimalFormat d3 = new DecimalFormat("#.###");
-
 		d3.setRoundingMode(RoundingMode.HALF_UP);
+
 		DecimalFormat d1 = new DecimalFormat("#.##");
 		d1.setRoundingMode(RoundingMode.HALF_UP);
 		

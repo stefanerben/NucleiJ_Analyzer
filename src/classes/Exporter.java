@@ -11,6 +11,7 @@ import ij.ImagePlus;
 
 /**
  * Exporter class for the NucleiJ Analyzer
+ *
  * @author Stefan Erben
  * @version 1.0
  *

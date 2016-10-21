@@ -4,14 +4,27 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
-public class Heatmap 
+import javax.imageio.ImageIO;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.awt.Color;
+import java.awt.Font;
+import java.io.File;
+import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+
+
+public class Heatmap
 {
+
 	public void create(String filename, String path, String newDirectoryname, int AUFLOESUNG_SLIDER, ImagePlus heatmapTmp, ImageProcessor heatmapMaske, ImageProcessor heatmap_ip, int w, int h)
 	{
 		//Dichte berechnen:		
   		float radiusFloat = (float) (w * 0.0002 * AUFLOESUNG_SLIDER);		//w/(w/aufloesung);
   		int radius = Math.round(radiusFloat);
   		int max = 0;
+		double max_double = 0;
   		int xsuchsetzRadius = w / (w/10);		//512
 		int ysuchsetzRadius = 10;		//467
 
@@ -106,6 +119,7 @@ public class Heatmap
   					if (dichte > max)
   					{
   						max = (int) dichte;
+						max_double = dichte;
   					}
   					//float dichte zu int tmp
   					int tmp = Math.round(dichte); 					
@@ -123,7 +137,10 @@ public class Heatmap
   			}
   		}
   		heatmapTmp.show();
-  		
+
+		double heatmapMaxDichteWert =  100 / (radius *radius / (max_double / 255 * (radius * radius)) );
+		System.out.println(heatmapMaxDichteWert + ", " + radius + "\n");
+
   		float faktorfloat = (255 / max);
   		String befehl = "value=%";
   		String value = String.valueOf(faktorfloat);
@@ -159,20 +176,64 @@ public class Heatmap
 					}
 				}
 			}
-			System.out.println(maxPixel +"\n");
 
 		}
 
-		// LUT anwenden
-		IJ.run(heatmapTmp, "Red/Green", "");
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		// Einfugen der Legende
+
+		// Berechnen der Werte
+		int hLegend = heatmapHeight / 900;
+		if (hLegend < 5)
+		{
+			hLegend = 5;
 		}
+
+		int wLegend = heatmapWidth / 900;
+		if (wLegend < 5)
+		{
+			wLegend = 5;
+		}
+		int hightLegend = heatmapHeight / 70;
+
+		int yStartLegend = heatmapHeight - hLegend - hightLegend;
+		int yEndLegend = heatmapHeight - hLegend;
+		int xStartLegend = wLegend;
+		int xEndLegend = heatmapWidth -wLegend;
+
+		int farbe = 0;
+		int lenghtLegend = heatmapWidth - (2 * wLegend);
+		int farbWechsel = lenghtLegend / 255;
+		int colorSwitchCounter = 0;
+
+		//px fuer px setzen
+		for (int x = xStartLegend; x <= xEndLegend; x++)
+		{
+			colorSwitchCounter++;
+
+			for (int y = yStartLegend; y <= yEndLegend; y++)
+			{
+				heatmap_ip.putPixel(x, y, farbe);
+			}
+
+
+			if (colorSwitchCounter == farbWechsel)
+			{
+				farbe++;
+				colorSwitchCounter = 0;
+				System.out.println("\nColorswitch\n"+farbe);
+
+			}
+
+		}
+
+
+
+
+		//TODO es fehlt das alte wait und dan LUT einstellen
 
 		//Speichern der Heatmap
-  		String resultsFilename = filename.replaceFirst("[.][^.]+$", "") + "_Heatmap.tif";		//Neuen Filenamen festlegen
+  		System.out.println("Image Created");
+		String resultsFilename = filename.replaceFirst("[.][^.]+$", "") + "_Heatmap.tif";		//Neuen Filenamen festlegen
   		String exportHeatmap = path + newDirectoryname + "\\" + resultsFilename;
 
 		IJ.run(heatmapTmp, "Median...", "radius=2");
@@ -180,10 +241,49 @@ public class Heatmap
 	    System.out.print("\n\nHeatmap exportiert...\n");
 	    System.out.print(exportHeatmap);
   		
-  		//heatmapTmp.changes = false;
-  		heatmapTmp.close();
-  		
-  		System.out.print("\n\nHeatmap created...");
+
+
+		// Text erstellen
+
+		//TODO besseres format damit immer gleich viele stellen agezeigt werden
+
+		
+		DecimalFormat d3 = new DecimalFormat("#.##");
+		d3.setRoundingMode(RoundingMode.HALF_UP);
+
+		String key = String.valueOf( d3.format(heatmapMaxDichteWert) )+ "%";
+
+
+		//BufferedImage bufferedImage = BufferedImageCreator.create(heatmapTmp, 0);
+		BufferedImage bufferedImage = heatmap_ip.getBufferedImage();
+
+		Graphics graphics = bufferedImage.getGraphics();
+
+		graphics.setColor(Color.GREEN);
+		graphics.setFont(new Font("Arial Black", Font.BOLD, 10));
+		graphics.drawString(key, lenghtLegend - 35, yStartLegend-5);
+		try {
+			ImageIO.write(bufferedImage, "png", new File(exportHeatmap));		//kein tif verfuegbar
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		heatmapTmp.changes = false;
+
+		heatmapTmp.close();
+
+		/*
+		// LUT anwenden
+		IJ.run(heatmapTmp, "Red/Green", "");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		*/
+
+
+		System.out.print("\n\nHeatmap created...");
   		
   		return;
 	}
