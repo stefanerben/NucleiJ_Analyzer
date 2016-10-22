@@ -146,7 +146,8 @@ public class Heatmap
   		String value = String.valueOf(faktorfloat);
 
 		// LUT anwenden
-		IJ.run(heatmapTmp, "Red/Green", "");
+		//IJ.run(heatmapTmp, "Red/Green", "");
+		IJ.run("LUT... ", "open=C:\\DA-Workspace\\NucleiJ_Analyzer\\lut\\RedGreenErben.lut");
 
 		//wieviel pixel sind auf 255?
 		int heatmapWidth = heatmap_ip.getWidth();
@@ -201,9 +202,9 @@ public class Heatmap
 		int xEndLegend = heatmapWidth -wLegend;
 
 		int farbe = 0;
-		int lenghtLegend = heatmapWidth - (2 * wLegend);
-		int farbWechsel = lenghtLegend / 255;
-		int colorSwitchCounter = 0;
+		double lenghtLegend = heatmapWidth - (2 * wLegend);
+		double farbWechsel = (lenghtLegend / 255);
+		double colorSwitchCounter = 0;
 
 		//px fuer px setzen
 		for (int x = xStartLegend; x <= xEndLegend; x++)
@@ -213,10 +214,11 @@ public class Heatmap
 			for (int y = yStartLegend; y <= yEndLegend; y++)
 			{
 				heatmap_ip.putPixel(x, y, farbe);
+
 			}
 
 
-			if (colorSwitchCounter == farbWechsel)
+			if (colorSwitchCounter == Math.round(farbWechsel) )
 			{
 				farbe++;
 				colorSwitchCounter = 0;
@@ -232,7 +234,6 @@ public class Heatmap
 		//TODO es fehlt das alte wait und dan LUT einstellen
 
 		//Speichern der Heatmap
-  		System.out.println("Image Created");
 		String resultsFilename = filename.replaceFirst("[.][^.]+$", "") + "_Heatmap.tif";		//Neuen Filenamen festlegen
   		String exportHeatmap = path + newDirectoryname + "\\" + resultsFilename;
 
@@ -247,7 +248,7 @@ public class Heatmap
 
 		//TODO besseres format damit immer gleich viele stellen agezeigt werden
 
-		
+
 		DecimalFormat d3 = new DecimalFormat("#.##");
 		d3.setRoundingMode(RoundingMode.HALF_UP);
 
@@ -260,8 +261,13 @@ public class Heatmap
 		Graphics graphics = bufferedImage.getGraphics();
 
 		graphics.setColor(Color.GREEN);
-		graphics.setFont(new Font("Arial Black", Font.BOLD, 10));
-		graphics.drawString(key, lenghtLegend - 35, yStartLegend-5);
+		graphics.setFont(new Font("Arial Black", Font.BOLD, heatmapWidth/50));
+		int schriftgroesse = Math.toIntExact((long) (lenghtLegend - 35));
+		if (schriftgroesse < 5)
+		{
+			schriftgroesse = 5;
+		}
+		graphics.drawString(key, schriftgroesse , yStartLegend-5);
 		try {
 			ImageIO.write(bufferedImage, "png", new File(exportHeatmap));		//kein tif verfuegbar
 		} catch (IOException e) {

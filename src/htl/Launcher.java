@@ -1,6 +1,7 @@
 package htl;
 
 import ij.IJ;
+import ij.ImageJ;
 
 /**
  * Launcher Class, starts NucleiJ Analyzer Programm
