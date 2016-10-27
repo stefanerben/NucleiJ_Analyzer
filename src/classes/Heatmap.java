@@ -207,9 +207,36 @@ public class Heatmap
 		double colorSwitchCounter = 0;
 
 		//px fuer px setzen
+
+		//Berechnungen fuer dynamisches Farbwechseln
+		//System.out.println("\n\nWERT=" +400/220 + "\n" + 400%220 + "\n");
+
+		// integer breite xEndLegend
+		//zu double
+		// integer pixelweite = breite / 255
+		// double uebertragswert = breite / 255
+		// double nextV = uebertragswert - pixelweite
+		// int nextC = 1 / nextV
+		// for schleife, zB jedes Dritte mal farbe nochmal ( colorSwitchCounter --)
+
+		double exactLegendwidth = xEndLegend;
+		int pixelweite = xEndLegend / 255;
+		double uebertragswert = exactLegendwidth / 255;
+		double nextV = uebertragswert - pixelweite;
+		int nextC = (int) Math.round(1 / nextV);
+		int changeColorP=0;
+
+		System.out.println("\n\nImmer um=" +pixelweite+ "weiter\nJedes" + nextC + ". Pixel farbe wiederholen\n");
+
 		for (int x = xStartLegend; x <= xEndLegend; x++)
 		{
 			colorSwitchCounter++;
+			changeColorP++;
+
+			if (changeColorP == nextC )
+			{
+				colorSwitchCounter--;
+			}
 
 			for (int y = yStartLegend; y <= yEndLegend; y++)
 			{
@@ -222,7 +249,7 @@ public class Heatmap
 			{
 				farbe++;
 				colorSwitchCounter = 0;
-				System.out.println("\nColorswitch\n"+farbe);
+				//System.out.println("\nColorswitch\n"+farbe);
 
 			}
 
