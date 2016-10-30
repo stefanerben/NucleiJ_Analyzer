@@ -1,4 +1,4 @@
-![banner.png](https://bitbucket.org/repo/LA8ez6/images/2873391084-banner.png)![NJAnalyzer_Banner](/images/Banner.png)
+![banner.png](https://bitbucket.org/repo/LA8ez6/images/2873391084-banner.png)
 
 # NucleiJ - Analyzer
 
