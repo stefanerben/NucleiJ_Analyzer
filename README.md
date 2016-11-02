@@ -1,4 +1,4 @@
-![banner.png](https://bitbucket.org/repo/LA8ez6/images/2002928435-banner.png)
+![arcl weis farbe.jpg](https://bitbucket.org/repo/LA8ez6/images/4086692984-arcl%20weis%20farbe.jpg)
 
 # NucleiJ - Analyzer
 
